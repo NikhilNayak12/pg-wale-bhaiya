@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LockClosedIcon } from '@heroicons/react/24/solid';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { mockLogin, DEMO_CREDENTIALS } from '@/services/mockAuth';
 
 const AdminLogin = () => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
@@ -16,55 +15,28 @@ const AdminLogin = () => {
     setError('');
     
     try {
-      // Use Firebase Authentication
-      const userCredential = await signInWithEmailAndPassword(
-        auth, 
-        credentials.email, 
-        credentials.password
-      );
-      const user = userCredential.user;
-      // Only allow your account to access admin panel
-      const allowedAdminEmail = "hello.pgwalebhaiya@gmail.com"; // <-- set your admin email here
-      if (user.email !== allowedAdminEmail) {
-        setError("Access denied. Only the owner can log in to the admin panel.");
+      // Mock admin login (no Firebase)
+      const userData = await mockLogin(credentials.email, credentials.password);
+      
+      // Check if user is admin type
+      if (userData.type !== 'admin') {
+        setError("Access denied. This is for admin accounts only.");
         setLoading(false);
         return;
       }
-      // Get Firebase ID token for API calls
-      const token = await user.getIdToken();
-      // Store admin authentication state
-      localStorage.setItem('adminAuthenticated', 'true');
-      localStorage.setItem('adminData', JSON.stringify({
-        email: user.email,
-        uid: user.uid,
-        role: 'admin'
-      }));
-      localStorage.setItem('authToken', token);
-      // Navigate to dashboard (updated secret path)
-      navigate('/admin-final-boss-1q2w/dashboard');
+      
+      // Navigate to admin dashboard
+      navigate('/admin/dashboard');
     } catch (error) {
-      console.error('Firebase auth error:', error);
-      // Handle different Firebase auth errors
+      console.error('Mock auth error:', error);
+      
       let errorMessage = 'Invalid credentials. Please try again.';
-      switch (error.code) {
-        case 'auth/user-not-found':
-          errorMessage = 'Admin account not found.';
-          break;
-        case 'auth/wrong-password':
-          errorMessage = 'Invalid password.';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = 'Invalid email address.';
-          break;
-        case 'auth/user-disabled':
-          errorMessage = 'Admin account has been disabled.';
-          break;
-        case 'auth/too-many-requests':
-          errorMessage = 'Too many failed attempts. Please try again later.';
-          break;
-        default:
-          errorMessage = 'Login failed. Please try again.';
+      if (error.message === 'EMAIL_NOT_FOUND') {
+        errorMessage = 'Admin account not found.';
+      } else if (error.message === 'INVALID_PASSWORD') {
+        errorMessage = 'Invalid password.';
       }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -148,10 +120,10 @@ const AdminLogin = () => {
             </button>
           </div>
           
-          <div className="text-center text-sm text-gray-500">
-            <p>Demo credentials:</p>
-            <p>Email: <code className="bg-gray-100 px-1 rounded">hello.pgwalebhaiya@gmail.com</code></p>
-            <p>Password: <code className="bg-gray-100 px-1 rounded">pgw@lebh@1y@@)@%</code></p>
+          <div className="text-center text-sm text-gray-500 bg-green-50 p-3 rounded border border-green-200">
+            <p className="font-medium text-green-900 mb-1">🎭 Demo Mode (No Backend)</p>
+            <p className="text-green-700">Email: <code className="bg-white px-1 rounded text-green-800">{DEMO_CREDENTIALS.admin.email}</code></p>
+            <p className="text-green-700">Password: <code className="bg-white px-1 rounded text-green-800">{DEMO_CREDENTIALS.admin.password}</code></p>
           </div>
           
           <div className="text-center">

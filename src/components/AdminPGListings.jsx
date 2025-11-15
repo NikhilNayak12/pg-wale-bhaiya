@@ -8,10 +8,10 @@ import {
   EyeIcon,
   FunnelIcon
 } from '@heroicons/react/24/outline';
-import { getAllPGs, updatePGStatus, updatePG } from '../utils/api';
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db } from '../config/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { getPGs } from '../data/pgs';
+import { mockGetAll, mockUpdate } from '../services/mockDB';
+import { mockUploadMultipleFiles } from '../services/mockStorage';
+import { mockUpdate as updateMock } from '../services/mockDB';
 
 const AdminPGListings = () => {
   const navigate = useNavigate();
@@ -41,70 +41,67 @@ const AdminPGListings = () => {
   const fetchRealListings = async () => {
     try {
       setLoading(true);
-      const response = await getAllPGs({ status: 'all' }); // Get all statuses for admin
       
-      if (response.data?.success && response.data?.data) {
-        const apiListings = response.data.data.map(pg => {
-          // Safe date handling - avoid invalid dates
-          let submittedDate;
-          try {
-            if (pg.submittedAt) {
-              const date = new Date(pg.submittedAt);
-              submittedDate = isNaN(date.getTime()) 
-                ? new Date().toISOString().split('T')[0]
-                : date.toISOString().split('T')[0];
-            } else if (pg.createdAt) {
-              const date = new Date(pg.createdAt);
-              submittedDate = isNaN(date.getTime()) 
-                ? new Date().toISOString().split('T')[0]
-                : date.toISOString().split('T')[0];
-            } else {
-              submittedDate = new Date().toISOString().split('T')[0];
-            }
-          } catch (error) {
-            console.warn('Invalid date for PG:', pg.id, error);
+      // Get PGs from static data + landlord-added PGs from localStorage
+      const staticPGs = await getPGs({});
+      const landlordPGs = mockGetAll('landlordPGs') || [];
+      
+      // Combine both sources
+      const allPGs = [...staticPGs, ...landlordPGs];
+      
+      const apiListings = allPGs.map(pg => {
+        // Safe date handling - avoid invalid dates
+        let submittedDate;
+        try {
+          if (pg.submittedAt) {
+            const date = new Date(pg.submittedAt);
+            submittedDate = isNaN(date.getTime()) 
+              ? new Date().toISOString().split('T')[0]
+              : date.toISOString().split('T')[0];
+          } else if (pg.createdAt) {
+            const date = new Date(pg.createdAt);
+            submittedDate = isNaN(date.getTime()) 
+              ? new Date().toISOString().split('T')[0]
+              : date.toISOString().split('T')[0];
+          } else {
             submittedDate = new Date().toISOString().split('T')[0];
           }
+        } catch (error) {
+          console.warn('Invalid date for PG:', pg.id, error);
+          submittedDate = new Date().toISOString().split('T')[0];
+        }
 
-          return {
-            id: pg.id || pg._id,
-            name: pg.name || pg.title,
-            landlord: pg.contact?.name || pg.contactPerson || 'Unknown',
-            location: typeof pg.location === 'object' 
-              ? `${pg.location.locality || ''}, ${pg.location.area || ''}`.trim() 
-              : pg.location || `${pg.area || ''}, ${pg.locality || ''}`.trim(),
-            price: pg.price || pg.monthlyRent || 0,
-            status: pg.status || 'pending',
-            submittedDate,
-            type: pg.submissionType === 'form' ? 'Form Submission' : 'Manual Entry',
-            contact: pg.contact || {
-              name: pg.contactPerson,
-              phone: pg.phoneNumber,
-              email: pg.email
-            },
-            description: pg.description,
-            amenities: pg.amenities || [],
-            availableRooms: pg.availableRooms,
-            genderPreference: pg.genderPreference,
-            pgCode: pg.pgCode || ''
-          };
-        });
-        
-        setRealListings(apiListings);
-        // Only use real listings, no demo data
-        setPgListings(apiListings);
-        console.log('Loaded PG listings:', apiListings.length, 'from API');
-      } else {
-        // No data from API - set empty arrays
-        setRealListings([]);
-        setPgListings([]);
-        console.log('No PG listings found in API');
-      }
+        return {
+          id: pg.id || pg._id,
+          name: pg.name || pg.title,
+          landlord: pg.contact?.name || pg.contactPerson || 'Unknown',
+          location: typeof pg.location === 'object' 
+            ? `${pg.location.locality || ''}, ${pg.location.area || ''}`.trim() 
+            : pg.location || `${pg.area || ''}, ${pg.locality || ''}`.trim(),
+          price: pg.price || pg.monthlyRent || 0,
+          status: pg.status || 'pending',
+          submittedDate,
+          type: pg.submissionType === 'form' ? 'Form Submission' : 'Manual Entry',
+          contact: pg.contact || {
+            name: pg.contactPerson,
+            phone: pg.phoneNumber,
+            email: pg.email
+          },
+          description: pg.description,
+          amenities: pg.amenities || [],
+          availableRooms: pg.availableRooms,
+          genderPreference: pg.genderPreference,
+          pgCode: pg.pgCode || ''
+        };
+      });
+      
+      setRealListings(apiListings);
+      setPgListings(apiListings);
+      console.log('Loaded PG listings:', apiListings.length);
       setError(null);
     } catch (err) {
-      console.warn('Failed to fetch real listings:', err);
-      setError('Could not load some listings from database');
-      // Set empty arrays instead of demo data
+      console.warn('Failed to fetch listings:', err);
+      setError('Could not load some listings');
       setRealListings([]);
       setPgListings([]);
     } finally {
@@ -117,8 +114,8 @@ const AdminPGListings = () => {
       console.log('Approving PG with ID:', id);
       // Generate unique PG code
       const pgCode = `PG-${Math.floor(10000 + Math.random() * 90000)}`;
-        // Update status and pgCode via backend API only
-        await updatePGStatus(id, { status: 'approved', pgCode });
+        // Update status and pgCode in mock local DB
+        await mockUpdate('pgs', id, { status: 'approved', pgCode });
         // Update local state
         setPgListings(prev => 
           prev.map(pg => 
@@ -135,8 +132,7 @@ const AdminPGListings = () => {
   const handleReject = async (id) => {
     try {
       console.log('Rejecting PG with ID:', id);
-      const response = await updatePGStatus(id, { status: 'rejected' });
-      console.log('Rejection response:', response);
+      await mockUpdate('pgs', id, { status: 'rejected' });
       
       // Update local state
       setPgListings(prev => 
@@ -195,21 +191,18 @@ const AdminPGListings = () => {
 
   const handleImageUpload = async (files) => {
     setImageUploadLoading(true);
-    const storage = getStorage();
-    const pgId = editingPG?.id;
-    const newImages = [];
-    for (const file of files) {
-      try {
-        const imageRef = storageRef(storage, `pg-images/${pgId}/${Date.now()}_${file.name}`);
-        await uploadBytes(imageRef, file);
-        const url = await getDownloadURL(imageRef);
-        newImages.push({ url, name: file.name });
-      } catch (error) {
-        console.error('Error uploading image:', error);
-      }
+    try {
+      const pgId = editingPG?.id || `pg_${Date.now()}`;
+      // Use mock storage to convert files to base64 and store in localStorage
+      const urls = await mockUploadMultipleFiles(Array.from(files), `pg-images/${pgId}`);
+      const newImages = urls.map((url, idx) => ({ url, name: files[idx]?.name || `image_${idx}` }));
+      setUploadedImages(prev => [...prev, ...newImages]);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload images. Try smaller files.');
+    } finally {
+      setImageUploadLoading(false);
     }
-    setUploadedImages(prev => [...prev, ...newImages]);
-    setImageUploadLoading(false);
   };
 
   const removeImage = (index) => {
@@ -237,7 +230,8 @@ const AdminPGListings = () => {
         images: uploadedImages.map(img => img.url), // Only store URLs
       };
 
-      await updateDoc(doc(db, 'pgs', editingPG.id), updateData);
+      // Update mock DB instead of Firestore
+      await mockUpdate('pgs', editingPG.id, updateData);
 
       // Update local state
       setPgListings(prev =>

@@ -12,11 +12,8 @@ import {
   Send,
   CheckCircle
 } from "lucide-react";
-import { db, auth } from "@/config/firebase";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { createPG } from "../utils/api";
-import { createLandlord } from "../utils/api";
+import { getCurrentUser } from "@/services/mockAuth";
+import { addLandlordPG } from "@/services/mockLandlordData";
 
 export default function PostPG() {
   const navigate = useNavigate();
@@ -93,43 +90,23 @@ export default function PostPG() {
     setSubmitStatus(null);
 
     try {
-      // Step 1: Create/Find Landlord Account
-      console.log('Step 1: Creating landlord account...');
-      
-      const landlordData = {
-        name: formData.contactPerson,
-        email: formData.email,
-        phone: formData.phoneNumber,
-        whatsapp: formData.whatsappNumber || formData.phoneNumber,
-        status: 'active',
-        joinedDate: new Date().toISOString()
-      };
-
-      let landlordResponse;
-      try {
-        landlordResponse = await createLandlord(landlordData);
-        console.log('Landlord created/found:', landlordResponse.data);
-      } catch (landlordError) {
-        console.warn('Landlord creation warning:', landlordError);
-        // Continue even if landlord creation fails - we'll use contact info
-        landlordResponse = { data: { success: true, data: { id: 'temp-' + Date.now() } } };
-      }
-
-      // Step 2: Prepare PG data with landlord reference
-      console.log('Step 2: Preparing PG data...');
+      // Mock PG submission (no backend)
+      console.log('Submitting PG to mock database...');
       
       const pgData = {
         name: formData.title,
+        title: formData.title,
         description: `${formData.roomType} available in ${formData.area}, ${formData.locality}. Contact ${formData.contactPerson} for more details.`,
         type: formData.roomType,
-        location: {
-          area: formData.area,
-          locality: formData.locality,
-          fullAddress: formData.fullAddress || `${formData.locality}, ${formData.area}`
-        },
+        roomType: formData.roomType,
+        location: `${formData.locality}, ${formData.area}`,
+        area: formData.area,
+        locality: formData.locality,
         price: parseInt(formData.monthlyRent),
-        totalRooms: parseInt(formData.totalRooms) || null,
+        monthlyRent: parseInt(formData.monthlyRent),
+        totalRooms: parseInt(formData.totalRooms) || parseInt(formData.availableRooms),
         availableRooms: parseInt(formData.availableRooms),
+        occupied: 0,
         genderPreference: formData.genderPreference.toLowerCase(),
         amenities: formData.amenities,
         otherAmenities: formData.otherAmenities,
@@ -139,22 +116,16 @@ export default function PostPG() {
           email: formData.email,
           whatsapp: formData.whatsappNumber || formData.phoneNumber
         },
-        landlordId: landlordResponse.data?.data?.id || null,
-        images: [], // Can be added later
-        status: 'pending', // Will be pending until admin approves
+        images: ['/pgs/green-1.jpg'], // Default image
         featured: false,
-        submittedAt: new Date().toISOString(),
-        submissionType: 'form' // To distinguish from admin-created
+        views: 0
       };
 
-      // Step 3: Save PG to database
-      console.log('Step 3: Saving PG to database...');
-      const response = await createPG(pgData);
+      // Save to mock database (localStorage)
+      const savedPG = addLandlordPG(pgData);
       
-      if (response.data.success) {
+      if (savedPG) {
         setSubmitStatus('success');
-        
-        // Step 4: Email notifications will be sent automatically by the backend
         
         // Store form data before reset for success message
         const submittedTitle = formData.title;
@@ -165,7 +136,6 @@ export default function PostPG() {
           roomType: "",
           area: "",
           locality: "",
-          fullAddress: "",
           monthlyRent: "",
           totalRooms: "",
           availableRooms: "",
@@ -177,22 +147,6 @@ export default function PostPG() {
           amenities: [],
           otherAmenities: ""
         });
-        
-        // Store landlord credentials for dashboard access
-        localStorage.setItem('landlordEmail', formData.email);
-        
-        if (landlordResponse.data?.data?.id) {
-          const landlordInfo = {
-            id: landlordResponse.data.data.id,
-            name: formData.contactPerson,
-            email: formData.email,
-            phone: formData.phoneNumber,
-            status: 'active',
-            loginCreated: true
-          };
-          localStorage.setItem('landlordData', JSON.stringify(landlordInfo));
-          localStorage.setItem('landlordLoggedIn', 'true');
-        }
         
         // Show success message with dashboard link
         setTimeout(() => {

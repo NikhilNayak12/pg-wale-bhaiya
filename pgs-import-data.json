@@ -1,0 +1,320 @@
+{
+  "pgs": {
+    "green-valley-pg": {
+      "id": "green-valley-pg",
+      "name": "Green Valley PG",
+      "title": "Green Valley PG",
+      "price": 8000,
+      "monthlyRent": 8000,
+      "rating": 4.5,
+      "reviews": 127,
+      "location": {
+        "address": "Near LPU Gate 3, Phagwara",
+        "city": "Phagwara",
+        "state": "Punjab",
+        "pincode": "144411",
+        "coordinates": {
+          "lat": 31.252,
+          "lng": 75.705
+        }
+      },
+      "area": "Phagwara",
+      "distance": "0.5 km from LPU",
+      "image": "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800",
+      "images": [
+        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800",
+        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800",
+        "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800"
+      ],
+      "gender": "Boys",
+      "roomType": "Double Sharing",
+      "amenities": ["WiFi", "AC", "Mess", "Laundry", "Security", "Power Backup"],
+      "food": "Included (Veg & Non-Veg)",
+      "contact": {
+        "phone": "+91 98765 43210",
+        "email": "greenvalley@example.com",
+        "whatsapp": "+91 98765 43210"
+      },
+      "description": "Modern PG accommodation with all essential amenities, located conveniently near LPU campus.",
+      "rules": [
+        "No smoking inside premises",
+        "Visitors allowed till 9 PM",
+        "Monthly rent to be paid before 5th"
+      ],
+      "nearbyPlaces": [
+        {"name": "LPU Gate 3", "distance": "0.5 km"},
+        {"name": "Medical Store", "distance": "0.2 km"},
+        {"name": "ATM", "distance": "0.3 km"}
+      ],
+      "availableFrom": "2024-01-15T00:00:00Z",
+      "featured": true,
+      "verified": true,
+      "status": "approved",
+      "landlordId": "landlord-001",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    "sunshine-residency": {
+      "id": "sunshine-residency",
+      "name": "Sunshine Residency",
+      "title": "Sunshine Residency",
+      "price": 6500,
+      "monthlyRent": 6500,
+      "rating": 4.3,
+      "reviews": 89,
+      "location": {
+        "address": "Sector 15, Near City Mall, Phagwara",
+        "city": "Phagwara",
+        "state": "Punjab",
+        "pincode": "144401",
+        "coordinates": {
+          "lat": 31.234,
+          "lng": 75.712
+        }
+      },
+      "area": "Phagwara",
+      "distance": "1.2 km from LPU",
+      "image": "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800",
+      "images": [
+        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800",
+        "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
+        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800"
+      ],
+      "gender": "Girls",
+      "roomType": "Triple Sharing",
+      "amenities": ["WiFi", "Mess", "Laundry", "Security", "Study Room", "Common Area"],
+      "food": "Included (Pure Veg)",
+      "contact": {
+        "phone": "+91 98765 43211",
+        "email": "sunshine@example.com",
+        "whatsapp": "+91 98765 43211"
+      },
+      "description": "Comfortable and safe accommodation for female students with homely environment.",
+      "rules": [
+        "No male visitors",
+        "Curfew at 10 PM",
+        "No outside food allowed"
+      ],
+      "nearbyPlaces": [
+        {"name": "City Mall", "distance": "0.5 km"},
+        {"name": "Bus Stand", "distance": "0.8 km"},
+        {"name": "Hospital", "distance": "1.0 km"}
+      ],
+      "availableFrom": "2024-02-01T00:00:00Z",
+      "featured": true,
+      "verified": true,
+      "status": "approved",
+      "landlordId": "landlord-002",
+      "createdAt": "2024-01-05T00:00:00Z",
+      "updatedAt": "2024-01-05T00:00:00Z"
+    },
+    "campus-comfort-pg": {
+      "id": "campus-comfort-pg",
+      "name": "Campus Comfort PG",
+      "title": "Campus Comfort PG",
+      "price": 7500,
+      "monthlyRent": 7500,
+      "rating": 4.6,
+      "reviews": 156,
+      "location": {
+        "address": "Behind Sports Complex, LPU Campus Road",
+        "city": "Phagwara",
+        "state": "Punjab",
+        "pincode": "144411",
+        "coordinates": {
+          "lat": 31.249,
+          "lng": 75.708
+        }
+      },
+      "area": "Phagwara",
+      "distance": "0.8 km from LPU",
+      "image": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
+      "images": [
+        "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
+        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800",
+        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800"
+      ],
+      "gender": "Boys",
+      "roomType": "Single Sharing",
+      "amenities": ["WiFi", "AC", "Attached Bathroom", "Study Table", "Wardrobe", "Geyser"],
+      "food": "Not Included",
+      "contact": {
+        "phone": "+91 98765 43212",
+        "email": "campuscomfort@example.com",
+        "whatsapp": "+91 98765 43212"
+      },
+      "description": "Premium single occupancy rooms with modern amenities for serious students.",
+      "rules": [
+        "Advance booking required",
+        "Security deposit: 2 months rent",
+        "Notice period: 1 month"
+      ],
+      "nearbyPlaces": [
+        {"name": "Sports Complex", "distance": "0.3 km"},
+        {"name": "Cafeteria", "distance": "0.4 km"},
+        {"name": "Stationery Shop", "distance": "0.2 km"}
+      ],
+      "availableFrom": "2024-02-15T00:00:00Z",
+      "featured": true,
+      "verified": true,
+      "status": "approved",
+      "landlordId": "landlord-003",
+      "createdAt": "2024-01-10T00:00:00Z",
+      "updatedAt": "2024-01-10T00:00:00Z"
+    },
+    "elite-student-pg": {
+      "id": "elite-student-pg",
+      "name": "Elite Student PG",
+      "title": "Elite Student PG",
+      "price": 5500,
+      "monthlyRent": 5500,
+      "rating": 4.2,
+      "reviews": 73,
+      "location": {
+        "address": "Railway Road, Near Station",
+        "city": "Phagwara",
+        "state": "Punjab",
+        "pincode": "144401",
+        "coordinates": {
+          "lat": 31.225,
+          "lng": 75.715
+        }
+      },
+      "area": "Phagwara",
+      "distance": "2.5 km from LPU",
+      "image": "https://images.unsplash.com/photo-1502672260066-6bc35f0a1935?w=800",
+      "images": [
+        "https://images.unsplash.com/photo-1502672260066-6bc35f0a1935?w=800",
+        "https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=800"
+      ],
+      "gender": "Boys",
+      "roomType": "Four Sharing",
+      "amenities": ["WiFi", "Mess", "Common TV", "Parking"],
+      "food": "Included (Veg)",
+      "contact": {
+        "phone": "+91 98765 43213",
+        "email": "elitepg@example.com",
+        "whatsapp": "+91 98765 43213"
+      },
+      "description": "Budget-friendly accommodation with basic amenities.",
+      "rules": [
+        "Rent includes electricity up to 100 units",
+        "Visitors allowed till 8 PM"
+      ],
+      "nearbyPlaces": [
+        {"name": "Railway Station", "distance": "0.3 km"},
+        {"name": "Market", "distance": "0.5 km"}
+      ],
+      "availableFrom": "2024-03-01T00:00:00Z",
+      "featured": false,
+      "verified": true,
+      "status": "approved",
+      "landlordId": "landlord-004",
+      "createdAt": "2024-01-15T00:00:00Z",
+      "updatedAt": "2024-01-15T00:00:00Z"
+    },
+    "royal-pg": {
+      "id": "royal-pg",
+      "name": "Royal PG",
+      "title": "Royal PG",
+      "price": 9000,
+      "monthlyRent": 9000,
+      "rating": 4.7,
+      "reviews": 203,
+      "location": {
+        "address": "VIP Road, Opposite City Hospital",
+        "city": "Phagwara",
+        "state": "Punjab",
+        "pincode": "144401",
+        "coordinates": {
+          "lat": 31.238,
+          "lng": 75.71
+        }
+      },
+      "area": "Phagwara",
+      "distance": "1.5 km from LPU",
+      "image": "https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=800",
+      "images": [
+        "https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=800",
+        "https://images.unsplash.com/photo-1502672260066-6bc35f0a1935?w=800"
+      ],
+      "gender": "Girls",
+      "roomType": "Double Sharing",
+      "amenities": ["WiFi", "AC", "Mess", "Gym", "Laundry", "CCTV", "Purifier"],
+      "food": "Included (Veg & Non-Veg)",
+      "contact": {
+        "phone": "+91 98765 43214",
+        "email": "royalpg@example.com",
+        "whatsapp": "+91 98765 43214"
+      },
+      "description": "Luxury PG with premium facilities and excellent security for female students.",
+      "rules": [
+        "Strict security measures",
+        "Biometric entry",
+        "Parent contact mandatory"
+      ],
+      "nearbyPlaces": [
+        {"name": "City Hospital", "distance": "0.1 km"},
+        {"name": "Shopping Mall", "distance": "0.7 km"}
+      ],
+      "availableFrom": "2024-02-20T00:00:00Z",
+      "featured": false,
+      "verified": true,
+      "status": "approved",
+      "landlordId": "landlord-005",
+      "createdAt": "2024-01-20T00:00:00Z",
+      "updatedAt": "2024-01-20T00:00:00Z"
+    },
+    "haven-residency": {
+      "id": "haven-residency",
+      "name": "Haven Residency",
+      "title": "Haven Residency",
+      "price": 7000,
+      "monthlyRent": 7000,
+      "rating": 4.4,
+      "reviews": 112,
+      "location": {
+        "address": "University Road, Near LPU Gate 2",
+        "city": "Phagwara",
+        "state": "Punjab",
+        "pincode": "144411",
+        "coordinates": {
+          "lat": 31.25,
+          "lng": 75.704
+        }
+      },
+      "area": "Phagwara",
+      "distance": "0.7 km from LPU",
+      "image": "https://images.unsplash.com/photo-1502672023488-70e25813eb80?w=800",
+      "images": [
+        "https://images.unsplash.com/photo-1502672023488-70e25813eb80?w=800"
+      ],
+      "gender": "Boys",
+      "roomType": "Triple Sharing",
+      "amenities": ["WiFi", "Mess", "Laundry", "Study Room", "Power Backup"],
+      "food": "Included (Veg)",
+      "contact": {
+        "phone": "+91 98765 43215",
+        "email": "havenresidency@example.com",
+        "whatsapp": "+91 98765 43215"
+      },
+      "description": "Well-maintained PG with focus on student comfort and study environment.",
+      "rules": [
+        "Quiet hours after 11 PM",
+        "No alcohol/smoking",
+        "Regular cleaning services"
+      ],
+      "nearbyPlaces": [
+        {"name": "LPU Gate 2", "distance": "0.7 km"},
+        {"name": "Cafe", "distance": "0.3 km"}
+      ],
+      "availableFrom": "2024-03-10T00:00:00Z",
+      "featured": false,
+      "verified": true,
+      "status": "approved",
+      "landlordId": "landlord-006",
+      "createdAt": "2024-01-25T00:00:00Z",
+      "updatedAt": "2024-01-25T00:00:00Z"
+    }
+  }
+}

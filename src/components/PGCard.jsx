@@ -55,7 +55,19 @@ export default function PGCard({ item }) {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-soft-lg overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
+      <div 
+        className="bg-white rounded-2xl overflow-hidden transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] animate-fadeInUp border border-gray-200"
+        style={{
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+          transition: 'transform 0.5s ease, box-shadow 0.5s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.15)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+        }}
+      >
         <div className="relative group">
           <button
             type="button"
@@ -66,7 +78,7 @@ export default function PGCard({ item }) {
             <img
               src={heroImage}
               alt={pgData.name}
-              className="w-full h-44 object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-110"
               onError={(e) => {
                 // Fallback to a default image if the current one fails to load
                 if (e.target.src !== '/pgs/campus-1.jpg') {
@@ -76,51 +88,68 @@ export default function PGCard({ item }) {
             />
           </button>
 
-          <div className="absolute left-3 top-3 bg-green-600 text-white px-2 py-1 text-xs rounded flex items-center gap-1">
-            <CheckCircle size={12} /> Verified
+          <div className="absolute left-4 top-4 bg-green-600 text-white px-3 py-1.5 text-xs font-semibold rounded-full flex items-center gap-1 shadow-lg">
+            <CheckCircle size={14} /> Verified
           </div>
         </div>
 
-        <div className="p-4">
+        <div className="p-5">
           <Link to={`/pg/${pgData.id}`}>
-            <h3 className="font-heading font-semibold text-lg hover:text-blue-600 transition-colors cursor-pointer">
+            <h3 className="font-bold text-xl hover:text-amber-700 transition-colors cursor-pointer" style={{ fontFamily: 'Poppins, sans-serif' }}>
               {pgData.name}
             </h3>
           </Link>
-          <p className="text-sm text-slate-500 mt-1">{pgData.distance}</p>
-          <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-            {pgData.location}
-          </p>
-
-          <div className="mt-3">
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-bold text-gray-800">₹{pgData.price?.toLocaleString()}</span>
-              <span className="text-sm text-slate-500">per month</span>
+          
+          <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-1">
+              <Star size={16} className="text-yellow-400 fill-yellow-400" />
+              <Star size={16} className="text-yellow-400 fill-yellow-400" />
+              <Star size={16} className="text-yellow-400 fill-yellow-400" />
+              <Star size={16} className="text-yellow-400 fill-yellow-400" />
+              <Star size={16} className="text-gray-300 fill-gray-300" />
             </div>
-            <div className="text-sm text-slate-500 mt-1">{pgData.type}</div>
+            <span className="text-sm font-semibold text-gray-700">4.0</span>
+            <span className="text-sm text-slate-500">(120 reviews)</span>
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {pgData.tags?.slice(0, 4).map((tag, index) => (
-              <span key={`${tag}-${index}`} className="text-xs bg-slate-100 text-gray-600 px-3 py-1 rounded-full">
+          <p className="text-sm text-slate-600 mt-2 flex items-center gap-1.5 font-medium">
+            <span className="w-2 h-2 bg-amber-700 rounded-full animate-pulse"></span>
+            {pgData.location}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">{pgData.distance} km from your college</p>
+
+          <div className="mt-4 bg-amber-50 rounded-xl p-4 border border-amber-200">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-amber-700" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                ₹{pgData.price?.toLocaleString()}
+              </span>
+              <span className="text-sm text-slate-600 font-medium">/ month</span>
+            </div>
+            <div className="text-sm text-slate-600 mt-1 font-medium">{pgData.type} Sharing</div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {pgData.tags?.slice(0, 3).map((tag, index) => (
+              <span key={`${tag}-${index}`} className="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full font-medium border border-amber-200">
                 {tag}
               </span>
             ))}
           </div>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-5 flex gap-3">
             <Link 
               to={`/pg/${pgData.id}`} 
-              className="flex-1 px-3 py-2 border rounded-lg text-sm transition hover:bg-gray-100 text-center"
+              className="flex-1 px-4 py-3 border-2 border-amber-700 text-amber-700 rounded-xl text-sm font-semibold transition-all duration-300 hover:bg-amber-50 hover:scale-105 text-center"
+              style={{ fontFamily: 'Poppins, sans-serif' }}
             >
               View Details
             </Link>
             <button 
               onClick={handleBookedClick}
-              className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm transition hover:bg-blue-700 font-medium"
+              className="flex-1 px-4 py-3 bg-amber-700 text-white rounded-xl text-sm font-semibold transition-all duration-300 hover:bg-amber-800 hover:shadow-lg hover:scale-105"
+              style={{ fontFamily: 'Poppins, sans-serif' }}
             >
-              Booked
+              Book Now
             </button>
           </div>
         </div>

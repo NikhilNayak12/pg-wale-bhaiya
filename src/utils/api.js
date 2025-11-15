@@ -1,11 +1,8 @@
 // API configuration for PG Wale Bhaiya frontend
 import axios from 'axios';
 
-// Base URL for the API - Firebase emulator for development
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.PROD 
-    ? 'https://api-y7s7mjbnma-uc.a.run.app'
-    : 'http://127.0.0.1:5001/pg-walebhaiya/us-central1/api');
+// Base URL for the API - Always use production URL (Firestore already has data)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api-y7s7mjbnma-uc.a.run.app';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -43,22 +40,7 @@ api.interceptors.response.use(
       localStorage.removeItem('adminAuthenticated');
       localStorage.removeItem('landlordData');
       
-      // Try to refresh token if we have Firebase auth
-      try {
-        const { auth } = await import('../config/firebase');
-        const user = auth.currentUser;
-        if (user) {
-          const newToken = await user.getIdToken(true); // Force refresh
-          localStorage.setItem('authToken', newToken);
-          // Retry the original request
-          error.config.headers.Authorization = `Bearer ${newToken}`;
-          return axios.request(error.config);
-        }
-      } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
-      }
-      
-      // Redirect to login if token refresh fails
+      // Redirect to login (no real backend token refresh in demo mode)
       window.location.href = '/admin/login';
     }
     return Promise.reject(error);

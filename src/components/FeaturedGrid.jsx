@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getAllPGs } from "../utils/api";
+import { getPGs } from "../data/pgs";
 import PGCard from "./PGCard";
 
 export default function FeaturedGrid() {
@@ -12,18 +13,30 @@ export default function FeaturedGrid() {
     const fetchFeaturedPGs = async () => {
       try {
         setLoading(true);
-        // Fetch approved PGs for featured section
-  const response = await getAllPGs({ status: 'approved', limit: 3 });
         
-        if (response.data.success) {
-          setFeaturedPGs(response.data.data);
-        } else {
-          throw new Error(response.data.message || 'Failed to fetch PGs');
+        // Try fetching from backend API first
+        try {
+          const response = await getAllPGs({ 
+            status: 'approved', 
+            featured: true,
+            limit: 3 
+          });
+          
+          if (response.data?.success && response.data?.data) {
+            setFeaturedPGs(response.data.data);
+            console.log('✅ Featured PGs loaded from backend API');
+          } else {
+            throw new Error('Invalid API response');
+          }
+        } catch (apiError) {
+          // Fallback to static data if API fails
+          console.warn('⚠️ Backend API unavailable, using static data:', apiError.message);
+          const pgs = await getPGs({ status: 'approved', limit: 3, featured: true });
+          setFeaturedPGs(pgs);
         }
       } catch (err) {
         console.error('Error fetching featured PGs:', err);
         setError(err.message);
-        // Fallback to demo data if API fails
         setFeaturedPGs([]);
       } finally {
         setLoading(false);
@@ -34,22 +47,22 @@ export default function FeaturedGrid() {
   }, []);
 
   return (
-    <section className="mt-24 px-1">
+    <section className="mt-32 px-1">
       <div className="text-center">
-        <h2 className="text-5xl font-extrabold">Featured PGs Near LPU</h2>
-        <p className="mt-6 text-xl text-slate-500">Hand-picked accommodations with verified amenities and quality service</p>
+        <h2 className="text-5xl font-extrabold text-black">Featured PGs Near Your College</h2>
+        <p className="mt-6 text-xl text-amber-400 font-semibold">Hand-picked accommodations with verified amenities and quality service</p>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center mt-10 h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-700"></div>
           <span className="ml-4 text-gray-600">Loading featured PGs...</span>
         </div>
       ) : error ? (
         <div className="text-center mt-10 p-8">
           <div className="text-red-600 mb-4">⚠️ Unable to load featured PGs</div>
           <p className="text-gray-600">{error}</p>
-          <Link to="/listings" className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <Link to="/listings" className="inline-block mt-4 px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700">
             View All Listings
           </Link>
         </div>
@@ -66,7 +79,7 @@ export default function FeaturedGrid() {
             ) : (
               <div className="col-span-full text-center py-12">
                 <div className="text-gray-500 text-lg">No featured PGs available at the moment</div>
-                <Link to="/listings" className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <Link to="/listings" className="inline-block mt-4 px-6 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800">
                   View All Listings
                 </Link>
               </div>
@@ -75,7 +88,7 @@ export default function FeaturedGrid() {
 
           <div className="text-center mt-8">
             <Link to="/listings">
-              <button className="px-6 py-2 rounded-lg bg-white font-semibold border border-gray-300 shadow-lg shadow-gray-300 hover:bg-gray-50 transition-colors">
+              <button className="px-6 py-2 rounded-lg bg-amber-600 text-white font-semibold shadow-lg hover:bg-amber-700 transition-colors">
                 View All PGs
               </button>
             </Link>

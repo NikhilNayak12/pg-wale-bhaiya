@@ -68,7 +68,7 @@ export default function About() {
         </div> */}
 
             {/* Our Story Section */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-3xl p-8 md:p-12 shadow-lg mb-16 border border-blue-200">
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-3xl p-8 md:p-12 shadow-lg mb-16 border border-amber-200">
               <div className="max-w-4xl mx-auto">
                 <h2 className="text-4xl font-bold text-gray-800 text-center mb-8">Our Story</h2>
                 <div className="prose prose-lg max-w-none text-gray-700">
@@ -98,7 +98,7 @@ export default function About() {
                   <p className="text-lg leading-relaxed mb-4">
                     We know what it's like to scroll endlessly, call a dozen people, and still not find the right place. That's why we built something better — by students, for students.
                   </p>
-                  <p className="text-lg leading-relaxed font-semibold text-blue-700">
+                  <p className="text-lg leading-relaxed font-semibold text-amber-700">
                     Let us handle the PG hunt, you handle college life.
                   </p>
                 </div>
@@ -113,8 +113,8 @@ export default function About() {
                   <div key={index} className="bg-white rounded-2xl p-8 shadow-lg transform transition-all duration-300 hover:shadow-xl hover:scale-105">
                     <div className="flex items-start space-x-4">
                       <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <feature.icon className="w-6 h-6 text-blue-600" />
+                        <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                          <feature.icon className="w-6 h-6 text-amber-700" />
                         </div>
                       </div>
                       <div>
@@ -128,31 +128,31 @@ export default function About() {
             </div>
 
             {/* Values Section */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 md:p-12 text-white mb-16">
+            <div className="bg-gradient-to-r from-amber-600 to-orange-700 rounded-3xl p-8 md:p-12 text-white mb-16">
               <div className="max-w-4xl mx-auto text-center">
                 <h2 className="text-4xl font-bold mb-8">Our Values</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div className="text-center">
-                    <Heart className="w-12 h-12 mx-auto mb-4 text-blue-200" />
+                    <Heart className="w-12 h-12 mx-auto mb-4 text-amber-200" />
                     <h3 className="text-xl font-semibold mb-3">Student-First</h3>
-                    <p className="text-blue-100">Every decision we make is centered around student needs and satisfaction.</p>
+                    <p className="text-amber-100">Every decision we make is centered around student needs and satisfaction.</p>
                   </div>
                   <div className="text-center">
-                    <Shield className="w-12 h-12 mx-auto mb-4 text-blue-200" />
+                    <Shield className="w-12 h-12 mx-auto mb-4 text-amber-200" />
                     <h3 className="text-xl font-semibold mb-3">Trust & Safety</h3>
-                    <p className="text-blue-100">We ensure all properties meet our strict safety and quality standards.</p>
+                    <p className="text-amber-100">We ensure all properties meet our strict safety and quality standards.</p>
                   </div>
                   <div className="text-center">
-                    <CheckCircle className="w-12 h-12 mx-auto mb-4 text-blue-200" />
+                    <CheckCircle className="w-12 h-12 mx-auto mb-4 text-amber-200" />
                     <h3 className="text-xl font-semibold mb-3">Transparency</h3>
-                    <p className="text-blue-100">No hidden fees, no surprises. Complete transparency in all our dealings.</p>
+                    <p className="text-amber-100">No hidden fees, no surprises. Complete transparency in all our dealings.</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Contact CTA */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-3xl p-8 md:p-12 shadow-lg text-center border border-blue-200">
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-3xl p-8 md:p-12 shadow-lg text-center border border-amber-200">
               <h2 className="text-3xl font-bold text-gray-800 mb-6">Ready to Find Your Perfect PG?</h2>
               <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
                 Your next PG might just be a scroll away.
@@ -160,17 +160,17 @@ export default function About() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link
                   to="/listings"
-                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >
                   Browse PG Listings
                   <ArrowRight size={20} />
                 </Link>
                 <div className="flex items-center gap-6 text-gray-700">
-                  <a href="tel:+919109222131" className="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                  <a href="tel:+919109222131" className="flex items-center gap-2 hover:text-amber-700 transition-colors">
                     <Phone size={18} />
                     <span>+91 9109222131</span>
                   </a>
-                  <a href="mailto:hello.pgwalebhaiya@gmail.com" className="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                  <a href="mailto:hello.pgwalebhaiya@gmail.com" className="flex items-center gap-2 hover:text-amber-700 transition-colors">
                     <Mail size={18} />
                     <span>hello.pgwalebhaiya@gmail.com</span>
                   </a>

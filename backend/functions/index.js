@@ -1678,6 +1678,318 @@ app.get("/search", async (req, res) => {
   }
 });
 
+// ============= STUDENT PROFILE APIs =============
+
+// Register student
+app.post("/students/register", async (req, res) => {
+  try {
+    const { name, email, college, phone, password } = req.body;
+    
+    const requiredFields = ['name', 'email'];
+    const missingFields = validateRequiredFields(req.body, requiredFields);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Missing required fields: ${missingFields.join(', ')}`
+      });
+    }
+    
+    // Check if student already exists
+    const existingStudent = await db.collection('students')
+      .where('email', '==', email.trim().toLowerCase())
+      .get();
+    
+    if (!existingStudent.empty) {
+      return res.status(400).json({
+        success: false,
+        message: "Student with this email already exists"
+      });
+    }
+    
+    const studentData = {
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      college: college?.trim() || '',
+      phone: phone?.trim() || '',
+      password: password, // In production, hash this
+      aadhaarVerified: false,
+      status: 'active',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+    
+    const docRef = await db.collection('students').add(studentData);
+    
+    res.status(201).json({
+      success: true,
+      message: "Student account created successfully!",
+      data: {
+        id: docRef.id,
+        name: studentData.name,
+        email: studentData.email,
+        college: studentData.college,
+        phone: studentData.phone
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error creating student:', error);
+    res.status(500).json({ success: false, message: "Error creating student account" });
+  }
+});
+
+// Student login
+app.post("/students/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required"
+      });
+    }
+    
+    const studentSnapshot = await db.collection('students')
+      .where('email', '==', email.trim().toLowerCase())
+      .get();
+    
+    if (studentSnapshot.empty) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "Invalid credentials" 
+      });
+    }
+    
+    const studentDoc = studentSnapshot.docs[0];
+    const studentData = studentDoc.data();
+    
+    if (studentData.password === password) {
+      return res.status(200).json({
+        success: true,
+        message: "Login successful!",
+        data: {
+          student: {
+            id: studentDoc.id,
+            email: studentData.email,
+            name: studentData.name,
+            college: studentData.college,
+            phone: studentData.phone,
+            aadhaarVerified: studentData.aadhaarVerified,
+            status: studentData.status
+          }
+        }
+      });
+    }
+    
+    return res.status(401).json({ 
+      success: false, 
+      message: "Invalid credentials" 
+    });
+  } catch (error) {
+    console.error('Student login error:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Internal server error" 
+    });
+  }
+});
+
+// Get student profile
+app.get("/students/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const doc = await db.collection('students').doc(id).get();
+    
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+    
+    const data = doc.data();
+    // Don't send password in response
+    delete data.password;
+    
+    res.json({
+      success: true,
+      data: {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.() || new Date(),
+        updatedAt: data.updatedAt?.toDate?.() || new Date()
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error fetching student:', error);
+    res.status(500).json({ success: false, message: "Error fetching student details" });
+  }
+});
+
+// Update student profile
+app.put("/students/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, college, phone } = req.body;
+    
+    const updateData = {
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+    
+    if (name) updateData.name = name.trim();
+    if (college) updateData.college = college.trim();
+    if (phone) updateData.phone = phone.trim();
+    
+    const docRef = db.collection('students').doc(id);
+    const doc = await docRef.get();
+    
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+    
+    await docRef.update(updateData);
+    
+    res.json({
+      success: true,
+      message: "Profile updated successfully!",
+      data: { id, ...updateData, updatedAt: new Date() }
+    });
+    
+  } catch (error) {
+    console.error('Error updating student profile:', error);
+    res.status(500).json({ success: false, message: "Error updating profile" });
+  }
+});
+
+// Upload student Aadhaar
+app.post("/students/:id/aadhaar", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { aadhaarData, aadhaarNumber } = req.body;
+    
+    if (!aadhaarData) {
+      return res.status(400).json({
+        success: false,
+        message: "Aadhaar document is required"
+      });
+    }
+    
+    const docRef = db.collection('students').doc(id);
+    const doc = await docRef.get();
+    
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+    
+    await docRef.update({
+      aadhaarData,
+      aadhaarNumber: aadhaarNumber?.trim() || '',
+      aadhaarVerified: false,
+      aadhaarUploadedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    
+    res.json({
+      success: true,
+      message: "Aadhaar uploaded successfully! It will be verified within 24-48 hours.",
+      data: { id, aadhaarVerified: false }
+    });
+    
+  } catch (error) {
+    console.error('Error uploading Aadhaar:', error);
+    res.status(500).json({ success: false, message: "Error uploading Aadhaar" });
+  }
+});
+
+// Verify student Aadhaar (Admin only)
+app.patch("/students/:id/verify-aadhaar", verifyFirebaseToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { verified } = req.body;
+    
+    if (!req.user.admin) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin privileges required."
+      });
+    }
+    
+    const docRef = db.collection('students').doc(id);
+    const doc = await docRef.get();
+    
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+    
+    await docRef.update({
+      aadhaarVerified: verified === true,
+      aadhaarVerifiedAt: verified ? admin.firestore.FieldValue.serverTimestamp() : null,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    
+    res.json({
+      success: true,
+      message: `Aadhaar ${verified ? 'verified' : 'rejected'} successfully!`,
+      data: { id, aadhaarVerified: verified === true }
+    });
+    
+  } catch (error) {
+    console.error('Error verifying Aadhaar:', error);
+    res.status(500).json({ success: false, message: "Error verifying Aadhaar" });
+  }
+});
+
+// Get all students (Admin only)
+app.get("/students", verifyFirebaseToken, async (req, res) => {
+  try {
+    if (!req.user.admin) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin privileges required."
+      });
+    }
+    
+    const { page = 1, limit = 20 } = req.query;
+    
+    const snapshot = await db.collection('students')
+      .orderBy('createdAt', 'desc')
+      .get();
+    
+    const students = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      delete data.password; // Don't send passwords
+      students.push({
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.() || new Date(),
+        updatedAt: data.updatedAt?.toDate?.() || new Date()
+      });
+    });
+    
+    // Pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedStudents = students.slice(startIndex, endIndex);
+    
+    res.json({
+      success: true,
+      data: paginatedStudents,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(students.length / limit),
+        totalItems: students.length,
+        itemsPerPage: parseInt(limit)
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    res.status(500).json({ success: false, message: "Error fetching students" });
+  }
+});
+
 // ============= MISC APIs =============
 
 // Health check
@@ -1757,8 +2069,26 @@ app.use((req, res) => {
     availableEndpoints: [
       'GET /health',
       'POST /setup-admin',
+      // Student APIs
+      'POST /students/register',
+      'POST /students/login',
+      'GET /students',
+      'GET /students/:id',
+      'PUT /students/:id',
+      'POST /students/:id/aadhaar',
+      'PATCH /students/:id/verify-aadhaar',
+      // Landlord APIs
       'POST /landlord-login',
       'POST /landlord-register', 
+      'POST /landlords',
+      'GET /landlords',
+      'GET /landlords/:id',
+      'PATCH /landlords/:id/status',
+      'GET /landlord/:landlordId/dashboard',
+      'GET /landlord/:landlordId/pgs',
+      'GET /landlord/:landlordId/inquiries',
+      'PUT /landlord/:landlordId/profile',
+      // PG APIs
       'GET /pgs',
       'POST /pgs',
       'GET /pgs/:id',
@@ -1768,20 +2098,17 @@ app.use((req, res) => {
       'POST /pgs/:id/view',
       'POST /pgs/:id/inquire',
       'GET /pgs/:id/inquiries',
+      // Inquiry APIs
       'GET /inquiries',
       'PATCH /inquiries/:id/status',
-      'POST /landlords',
-      'GET /landlords',
-      'GET /landlords/:id',
-      'PATCH /landlords/:id/status',
-      'GET /landlord/:landlordId/dashboard',
-      'GET /landlord/:landlordId/pgs',
-      'GET /landlord/:landlordId/inquiries',
-      'PUT /landlord/:landlordId/profile',
+      // Dashboard APIs
       'GET /admin/dashboard',
+      // Search & Filter APIs
       'GET /search',
       'GET /amenities',
+      // Contact APIs
       'POST /contact',
+      // Cashback APIs
       'POST /cashback-requests',
       'GET /admin/cashback-requests',
       'PATCH /admin/cashback-requests/:id/status'

@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, ArrowRight } from "lucide-react";
+import { mockPasswordReset } from "@/services/mockAuth";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-  // Read API key from Vite env variables (must be prefixed with VITE_)
-  const API_KEY = import.meta.env.VITE_FIREBASE_API_KEY;
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -19,47 +18,26 @@ export default function ResetPassword() {
       setError("Please enter your email address");
       return;
     }
-    if (!API_KEY) {
-      setError('Firebase API key is not configured. Please set VITE_FIREBASE_API_KEY in your environment.');
-      return;
-    }
 
     setIsSubmitting(true);
-    fetch(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        requestType: 'PASSWORD_RESET',
-        email
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        setIsSubmitting(false);
-        if (data.error) {
-          let msg = "";
-          switch (data.error.message) {
-            case "EMAIL_NOT_FOUND":
-              msg = "No account found with this email.";
-              break;
-            case "INVALID_EMAIL":
-              msg = "Invalid email address.";
-              break;
-            default:
-              msg = data.error.message;
-          }
-          setError(msg);
-        } else {
-          setSuccess("Password reset email sent! Please check your inbox.");
-          setTimeout(() => {
-            navigate("/login");
-          }, 2000);
-        }
-      })
-      .catch(err => {
-        setIsSubmitting(false);
-        setError(err.message);
-      });
+    
+    try {
+      await mockPasswordReset(email);
+      setIsSubmitting(false);
+      setSuccess("Password reset email sent! Please check your inbox.");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (error) {
+      setIsSubmitting(false);
+      let msg = "";
+      if (error.message === 'EMAIL_NOT_FOUND') {
+        msg = "No account found with this email.";
+      } else {
+        msg = error.message || "Failed to send reset email";
+      }
+      setError(msg);
+    }
   };
 
   return (

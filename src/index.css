@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Google Fonts - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Import Mileast font */
+@font-face {
+  font-family: 'Mileast';
+  src: url('./assets/fonts/Mileast.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Mileast';
+  src: url('./assets/fonts/Mileast Italic.otf') format('opentype');
+  font-weight: normal;
+  font-style: italic;
+}
+
 /* Set body font */
 :root {
   --primary: #0ea5e9;
@@ -13,7 +31,12 @@ html, body, #root {
 }
 
 body {
-  @apply font-sans bg-white text-slate-800;
+  @apply font-sans text-slate-900;
+  background: url('src/assets/wood-1846849_1280.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: scroll;
+  background-repeat: repeat;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
@@ -39,17 +62,17 @@ body {
 
 /* Primary gradient button */
 .btn-primary {
-  background: linear-gradient(90deg, #0ea5e9, #0b86cc);
-  @apply text-white font-semibold rounded-full shadow-[0_8px_20px_rgba(14,30,37,0.12)] px-5 py-2.5;
+  background: linear-gradient(90deg, #d97706, #b45309);
+  @apply text-white font-semibold rounded-full shadow-[0_8px_20px_rgba(217,119,6,0.3)] px-5 py-2.5;
   transition: transform .15s ease, box-shadow .15s ease;
 }
 .btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 24px 50px rgba(14,30,37,0.16);
+  box-shadow: 0 24px 50px rgba(217,119,6,0.4);
 }
 .btn-primary:active {
   transform: translateY(0);
-  box-shadow: 0 8px 20px rgba(14,30,37,0.08);
+  box-shadow: 0 8px 20px rgba(217,119,6,0.2);
 }
 
 /* Secondary button */
@@ -122,4 +145,51 @@ body {
 /* Soft shadow utility */
 .shadow-soft-lg {
   box-shadow: 0 4px 16px rgba(16,24,40,0.08);
+}
+
+/* Fade-in and slide-up animation for hero */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+/* Slide-down animation for mobile menu */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+/* Floating animation for CTA buttons */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }

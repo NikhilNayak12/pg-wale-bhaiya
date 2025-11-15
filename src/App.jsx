@@ -22,8 +22,11 @@ import Signup from "@/pages/Signup";
 import LandlordDashboard from "@/pages/LandlordDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminLogin from "@/pages/AdminLogin";
+import StudentLogin from "@/pages/StudentLogin";
+import StudentDashboard from "@/pages/StudentDashboard";
 import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
 import ProtectedLandlordRoute from "@/components/ProtectedLandlordRoute";
+import ProtectedStudentRoute from "@/components/ProtectedStudentRoute";
 
 // Component to handle scroll to top on route change
 function ScrollToTop() {
@@ -45,9 +48,8 @@ function HomePage() {
         <FeaturedGrid />
       </section>
 
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
-        <Features />
-      </section>
+      {/* Full width carousel section */}
+      <Features />
 
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
         <CTA />
@@ -63,15 +65,16 @@ function HomePage() {
 // Component to conditionally render navbar and footer
 function Layout({ children }) {
   const location = useLocation();
-  // Detect both old and new admin routes
-  const isAdminRoute = location.pathname.startsWith('/admin-final-boss-1q2w');
+  // Detect admin and student dashboard routes (hide navbar and footer)
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isStudentDashboard = location.pathname.startsWith('/student/dashboard');
 
   return (
     <div className="font-sans text-slate-900">
       <ScrollToTop />
-      {!isAdminRoute && <Navbar />}
+      {!isAdminRoute && !isStudentDashboard && <Navbar />}
       {children}
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && !isStudentDashboard && <Footer />}
     </div>
   );
 }
@@ -92,9 +95,13 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/dashboard" element={<ProtectedLandlordRoute><LandlordDashboard /></ProtectedLandlordRoute>} />
           <Route path="/landlord-dashboard" element={<ProtectedLandlordRoute><LandlordDashboard /></ProtectedLandlordRoute>} />
-          <Route path="/admin-final-boss-1q2w/login" element={<AdminLogin />} />
-          <Route path="/admin-final-boss-1q2w/dashboard" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
-          <Route path="/admin-final-boss-1q2w" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+          <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+          <Route path="/admin/pgs" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+          <Route path="/admin/cashback" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+          <Route path="/student/login" element={<StudentLogin />} />
+          <Route path="/student/dashboard" element={<ProtectedStudentRoute><StudentDashboard /></ProtectedStudentRoute>} />
           <Route path="/pg/:id" element={<PGDetails />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />

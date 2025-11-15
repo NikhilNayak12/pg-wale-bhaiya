@@ -16,12 +16,13 @@ import {
   Calendar,
   Settings,
   BarChart3,
-  RefreshCw
+  RefreshCw,
+  Upload,
+  FileText,
+  AlertCircle
 } from 'lucide-react';
-import { db, auth } from "@/config/firebase";
-import { signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { getAllPGs, updatePGStatus } from '../utils/api';
+import { mockLogout } from '@/services/mockAuth';
+import { getLandlordPGs, getLandlordStats, updateLandlordPG } from '@/services/mockLandlordData';
 
 const StatusBadge = ({ status }) => {
   const statusConfig = {
@@ -60,7 +61,7 @@ const StatusBadge = ({ status }) => {
 
 const StatsCard = ({ title, value, icon: Icon, trend, trendValue, color = "blue" }) => {
   const colorClasses = {
-    blue: "bg-blue-50 text-blue-600",
+    blue: "bg-amber-50 text-amber-600",
     green: "bg-green-50 text-green-600", 
     yellow: "bg-yellow-50 text-yellow-600",
     red: "bg-red-50 text-red-600"
@@ -84,7 +85,7 @@ const StatsCard = ({ title, value, icon: Icon, trend, trendValue, color = "blue"
 const ActionButton = ({ icon: Icon, label, onClick, variant = 'secondary' }) => {
   const baseClasses = "inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors";
   const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700",
+    primary: "bg-amber-600 text-white hover:bg-amber-700",
     secondary: "bg-gray-100 text-gray-700 hover:bg-gray-200",
     success: "bg-green-100 text-green-700 hover:bg-green-200",
     danger: "bg-red-100 text-red-700 hover:bg-red-200"
@@ -133,72 +134,78 @@ export default function LandlordDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [landlordName, setLandlordName] = useState("");
+  const [aadhaarFile, setAadhaarFile] = useState(null);
+  const [aadhaarPreview, setAadhaarPreview] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState(null);
 
-  const fetchLandlordName = async () => {
-    // Get landlord ID from localStorage
+  const fetchLandlordName = () => {
     const landlordData = JSON.parse(localStorage.getItem('landlordData') || '{}');
-    const landlordId = landlordData.id;
-    if (!landlordId) return;
-    try {
-      const docRef = doc(db, "landlords", landlordId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setLandlordName(docSnap.data().name || "");
-      }
-    } catch {}
+    setLandlordName(landlordData.name || "Landlord");
   };
 
   useEffect(() => {
     fetchDashboardData();
     fetchLandlordName();
+    loadSavedDocument();
   }, []);
+
+  const loadSavedDocument = () => {
+    const landlordData = JSON.parse(localStorage.getItem('landlordData') || '{}');
+    const savedDoc = localStorage.getItem(`landlord_${landlordData.id || 'demo'}_aadhaar`);
+    if (savedDoc) {
+      setAadhaarPreview(savedDoc);
+      setUploadStatus('verified');
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size should be less than 5MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAadhaarFile(file);
+        setAadhaarPreview(reader.result);
+        setUploadStatus(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUploadDocument = () => {
+    if (aadhaarPreview) {
+      const landlordData = JSON.parse(localStorage.getItem('landlordData') || '{}');
+      localStorage.setItem(`landlord_${landlordData.id || 'demo'}_aadhaar`, aadhaarPreview);
+      setUploadStatus('verified');
+      setTimeout(() => setUploadStatus(null), 3000);
+    }
+  };
+
+  const handleRemoveDocument = () => {
+    const landlordData = JSON.parse(localStorage.getItem('landlordData') || '{}');
+    localStorage.removeItem(`landlord_${landlordData.id || 'demo'}_aadhaar`);
+    setAadhaarFile(null);
+    setAadhaarPreview(null);
+    setUploadStatus(null);
+  };
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Get landlord ID from localStorage
-      const landlordData = JSON.parse(localStorage.getItem('landlordData') || '{}');
-      const landlordEmail = landlordData.email || localStorage.getItem('landlordEmail');
+      // Get landlord PGs from mock data (localStorage)
+      const landlordPGs = getLandlordPGs();
       
-      if (!landlordEmail) {
-        throw new Error('No landlord information found. Please submit a PG first or log in.');
-      }
-
-      // Fetch all PGs and filter by landlord email
-      const response = await getAllPGs({ includeAll: true });
+      setPgData(landlordPGs);
       
-      if (response.data?.success && response.data?.data) {
-        const landlordPGs = response.data.data
-          .filter(pg => pg.landlordId && landlordData.id && pg.landlordId === landlordData.id)
-          .map(pg => ({
-            id: pg.id,
-            title: pg.name || pg.title,
-            location: typeof pg.location === 'object' 
-              ? `${pg.location.locality || ''}, ${pg.location.area || ''}`.trim()
-              : pg.location || pg.area,
-            status: pg.status === 'approved' ? 'live' : pg.status, // Convert approved to live
-            price: pg.price || pg.monthlyRent,
-            rooms: pg.totalRooms || 0,
-            occupied: pg.totalRooms ? (pg.totalRooms - pg.availableRooms) : 0,
-            datePosted: pg.submittedAt || pg.createdAt,
-            views: pg.views || 0,
-            image: pg.images?.[0] || "/pgs/green-1.jpg", // Default image
-            featured: pg.featured || false,
-            type: pg.type || pg.roomType,
-            availableRooms: pg.availableRooms,
-            pgCode: pg.pgCode || ''
-          }));
-        
-        setPgData(landlordPGs);
-        
-        // If no PGs found but landlord exists, show empty state
-        if (landlordPGs.length === 0) {
-          console.log('No PGs found for landlord email:', landlordEmail);
-        }
-      } else {
-        throw new Error('Failed to fetch PG data');
+      // Show empty state if no PGs
+      if (landlordPGs.length === 0) {
+        console.log('No PGs found - showing empty state');
       }
     } catch (err) {
       console.warn('Failed to fetch dashboard data:', err.message);
@@ -213,15 +220,8 @@ export default function LandlordDashboard() {
     fetchDashboardData();
   };
 
-  // Calculate stats from current data
-  const stats = {
-  total: pgData.length,
-  live: pgData.filter(pg => pg.status === 'live').length,
-  pending: pgData.filter(pg => pg.status === 'pending').length,
-  sold: pgData.filter(pg => pg.status === 'sold').length,
-  rejected: pgData.filter(pg => pg.status === 'rejected').length,
-  featured: pgData.filter(pg => pg.featured).length,
-  };
+  // Calculate stats from mock data
+  const stats = getLandlordStats();
 
   // Filter PGs based on search and status
   const filteredPGs = pgData.filter(pg => {
@@ -278,25 +278,20 @@ export default function LandlordDashboard() {
   };
 
   return (
-    <div className="min-h-screen pt-28 bg-gray-50">
+    <div className="min-h-screen pt-28 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div>
-              <h1 className="text-2xl font-bold text-blue-700">Welcome, {landlordName || 'Landlord'}!</h1>
+              <h1 className="text-2xl font-bold text-amber-700">Welcome, {landlordName || 'Landlord'}!</h1>
               <p className="text-sm text-gray-600">Manage your property listings</p>
             </div>
             {/* Logout button top right */}
             <button
               onClick={async () => {
                 if (window.confirm('Are you sure you want to logout?')) {
-                  try {
-                    await signOut(auth);
-                  } catch {}
-                  localStorage.removeItem('landlordData');
-                  localStorage.removeItem('landlordLoggedIn');
-                  localStorage.removeItem('landlordEmail');
+                  mockLogout('landlord');
                   window.location.href = '/';
                 }
               }}
@@ -336,6 +331,106 @@ export default function LandlordDashboard() {
             icon={DollarSign} 
             color="red"
           />
+        </div>
+
+        {/* Document Verification Section */}
+        <div className="bg-white rounded-xl shadow-soft-lg p-6 mb-8 border-2 border-amber-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-amber-50 rounded-lg">
+              <FileText className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Document Verification</h2>
+              <p className="text-sm text-gray-600">Upload your Aadhaar card for landlord verification</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {!aadhaarPreview ? (
+              <div className="border-2 border-dashed border-amber-200 rounded-lg p-8 text-center hover:border-amber-400 transition-colors">
+                <Upload className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+                <p className="text-gray-700 font-medium mb-2">Upload Aadhaar Card</p>
+                <p className="text-sm text-gray-500 mb-4">Supports: JPG, PNG, PDF (Max 5MB)</p>
+                <label className="btn-primary inline-flex items-center gap-2 cursor-pointer">
+                  <Upload size={18} />
+                  Choose File
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="border-2 border-amber-200 rounded-lg p-4 bg-amber-50/50">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      {aadhaarPreview.includes('application/pdf') ? (
+                        <div className="w-20 h-20 bg-red-100 rounded-lg flex items-center justify-center">
+                          <FileText className="w-10 h-10 text-red-600" />
+                        </div>
+                      ) : (
+                        <img
+                          src={aadhaarPreview}
+                          alt="Aadhaar preview"
+                          className="w-20 h-20 object-cover rounded-lg"
+                        />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="w-5 h-5 text-amber-600" />
+                        <span className="font-medium text-gray-900">
+                          {aadhaarFile?.name || 'Aadhaar Card'}
+                        </span>
+                      </div>
+                      {uploadStatus === 'verified' ? (
+                        <div className="flex items-center gap-2 text-green-600">
+                          <CheckCircle size={16} />
+                          <span className="text-sm font-medium">Document verified successfully!</span>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-600">Document ready to upload</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  {uploadStatus !== 'verified' && (
+                    <button
+                      onClick={handleUploadDocument}
+                      className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                    >
+                      <Upload size={18} />
+                      Upload & Verify
+                    </button>
+                  )}
+                  <button
+                    onClick={handleRemoveDocument}
+                    className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 font-semibold py-2.5 px-6 rounded-lg transition-all flex items-center justify-center gap-2"
+                  >
+                    <AlertCircle size={18} />
+                    Remove Document
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {uploadStatus === 'verified' && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-green-900">Verification Complete</p>
+                  <p className="text-sm text-green-700">
+                    Your Aadhaar card has been uploaded and saved successfully. This helps build trust with potential tenants.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Controls */}
@@ -446,7 +541,7 @@ export default function LandlordDashboard() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-700 font-bold">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-amber-700 font-bold">
                         {pg.pgCode ? pg.pgCode : <span className="text-gray-400">—</span>}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

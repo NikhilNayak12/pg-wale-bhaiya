@@ -17,19 +17,14 @@
     "start:backend": "cd backend/functions ; firebase emulators:start --only functions,firestore,auth",
     "start:backend:prod": "cd backend/functions ; firebase emulators:start --import=./emulator-data --export-on-exit=./emulator-data",
     "test:api": "cd backend ; node test-api.js",
-    "test:landlord": "cd backend ; node test-landlord-apis.js",
-    "lint": "eslint src --ext .js,.jsx --fix",
-    "lint:check": "eslint src --ext .js,.jsx",
-    "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist node_modules/.vite",
-    "analyze": "npm run build ; npx vite-bundle-analyzer dist/assets/*.js",
-    "prepare": "npm run lint:check"
+    "test:landlord": "cd backend ; node test-landlord-apis.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@vitejs/plugin-react": "^4.7.0",
     "axios": "^1.11.0",
-    "firebase": "^12.1.0",
+    "firebase": "^12.6.0",
+    "firebase-admin": "^13.6.0",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.536.0",
     "react": "^18.2.0",

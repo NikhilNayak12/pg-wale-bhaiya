@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { getAllPGs, searchPGs } from "@/utils/api";
+import { getAllPGs } from "../utils/api";
+import { getPGs } from "../data/pgs";
 import PGCard from "@/components/PGCard";
 import { Search, Filter, MapPin, Home, IndianRupee, Loader2 } from "lucide-react";
 
@@ -25,40 +26,72 @@ export default function Listings() {
   const [filters, setFilters] = useState(getInitialFilters);
   const [appliedFilters, setAppliedFilters] = useState(getInitialFilters);
 
-  // Fetch PGs data from API
+  // Fetch PGs data from backend API with fallback
   useEffect(() => {
     const fetchPGs = async () => {
       try {
         setLoading(true);
         
-        // Build clean search params - exclude "All" values that would cause empty results
-        const searchParams = {
-          status: 'approved'
-        };
-
-        // Only add filters that are not "All" values
-        if (appliedFilters.search && appliedFilters.search.trim()) {
-          searchParams.search = appliedFilters.search.trim();
-        }
-
-        if (appliedFilters.location && appliedFilters.location !== 'All Cities') {
-          searchParams.location = appliedFilters.location;
-        }
-
-        if (appliedFilters.roomType && appliedFilters.roomType !== 'All Types') {
-          searchParams.roomType = appliedFilters.roomType;
-        }
-
-        if (appliedFilters.minPrice) {
-          searchParams.minPrice = parseInt(appliedFilters.minPrice);
-        }
-
-        if (appliedFilters.maxPrice) {
-          searchParams.maxPrice = parseInt(appliedFilters.maxPrice);
+        let allPGs = [];
+        
+        // Try fetching from backend API first
+        try {
+          const response = await getAllPGs({ status: 'approved' });
+          
+          if (response.data?.success && response.data?.data) {
+            allPGs = response.data.data;
+            console.log('✅ PGs loaded from backend API:', allPGs.length);
+          } else {
+            throw new Error('Invalid API response');
+          }
+        } catch (apiError) {
+          // Fallback to static data if API fails
+          console.warn('⚠️ Backend API unavailable, using static data:', apiError.message);
+          allPGs = await getPGs({ status: 'approved' });
         }
         
-        const response = await getAllPGs(searchParams);
-        setPGs(response.data?.data || []);
+        // Apply client-side filtering
+        let filtered = [...allPGs];
+        
+        // Search filter
+        if (appliedFilters.search && appliedFilters.search.trim()) {
+          const searchTerm = appliedFilters.search.trim().toLowerCase();
+          filtered = filtered.filter(pg => 
+            pg.name?.toLowerCase().includes(searchTerm) ||
+            pg.description?.toLowerCase().includes(searchTerm) ||
+            pg.location?.toLowerCase().includes(searchTerm)
+          );
+        }
+        
+        // Location filter
+        if (appliedFilters.location && appliedFilters.location !== 'All Cities') {
+          filtered = filtered.filter(pg => 
+            pg.location?.includes(appliedFilters.location) ||
+            pg.area?.includes(appliedFilters.location)
+          );
+        }
+        
+        // Room type filter (gender preference)
+        if (appliedFilters.roomType && appliedFilters.roomType !== 'All Types') {
+          const roomType = appliedFilters.roomType.toLowerCase();
+          filtered = filtered.filter(pg => 
+            pg.genderPreference?.toLowerCase() === roomType ||
+            pg.genderPreference === 'any'
+          );
+        }
+        
+        // Price filters
+        if (appliedFilters.minPrice) {
+          const minPrice = parseInt(appliedFilters.minPrice);
+          filtered = filtered.filter(pg => (pg.price || pg.monthlyRent) >= minPrice);
+        }
+        
+        if (appliedFilters.maxPrice) {
+          const maxPrice = parseInt(appliedFilters.maxPrice);
+          filtered = filtered.filter(pg => (pg.price || pg.monthlyRent) <= maxPrice);
+        }
+        
+        setPGs(filtered);
         
       } catch (err) {
         console.error('Error fetching PGs:', err);
@@ -82,50 +115,10 @@ export default function Listings() {
   const locations = ['All Cities', 'Law Gate', 'Phagwara', 'Deep Nagar', 'Green Avenue', 'Model Town', 'Urban Estate', 'Civil Lines', 'Banga Road'];
   const roomTypes = ['All Types', 'Single', 'Double', 'Triple', '1 BHK', '2 BHK', '3 BHK'];
 
-  // Filter function - now we'll let the API handle most filtering
+  // Apply filters (client-side since we're using static data)
   const applyFiltersToAPI = async () => {
-    try {
-      setLoading(true);
-      
-      const searchParams = {
-        status: 'approved',
-        page: 1,
-        limit: 50
-      };
-
-      // Add search query
-      if (filters.search.trim()) {
-        searchParams.search = filters.search.trim();
-      }
-
-      // Add location filter - Only add if not "All Cities"
-      if (filters.location && filters.location !== 'All Cities') {
-        searchParams.location = filters.location;
-      }
-
-      // Add room type filter - Only add if not "All Types"
-      if (filters.roomType && filters.roomType !== 'All Types') {
-        searchParams.roomType = filters.roomType;
-      }
-
-      // Add price filters
-      if (filters.minPrice) {
-        searchParams.minPrice = parseInt(filters.minPrice);
-      }
-      if (filters.maxPrice) {
-        searchParams.maxPrice = parseInt(filters.maxPrice);
-      }
-
-      const response = await getAllPGs(searchParams);
-      setPGs(response.data.data || []);
-      setAppliedFilters(filters);
-    } catch (err) {
-      console.error('Error searching PGs:', err);
-      setError('Failed to search PGs. Please try again.');
-      setPGs([]);
-    } finally {
-      setLoading(false);
-    }
+    // Just update applied filters - the useEffect will handle fetching
+    setAppliedFilters(filters);
   };
 
   const handleFilterChange = (key, value) => {
@@ -178,9 +171,9 @@ export default function Listings() {
         )}
 
         {/* Filter Section */}
-        <div className="bg-sky-200 rounded-2xl shadow-lg p-4 mb-8">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 mb-8 text-gray-800">
           <div className="flex items-center gap-2 mb-6">
-            <Filter className="text-blue-600" size={20} />
+            <Filter className="text-amber-700" size={20} />
             <h2 className="text-lg font-semibold text-gray-900">Filter Your Search</h2>
           </div>
           
@@ -193,7 +186,7 @@ export default function Listings() {
                 placeholder="Search"
                 value={filters.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
-                className="w-full placeholder-gray-500 bg-sky-100 pl-10 pr-4 py-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="w-full placeholder-gray-500 bg-amber-50 pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-300 focus:border-transparent outline-none"
               />
             </div>
 
@@ -203,7 +196,7 @@ export default function Listings() {
               <select
                 value={filters.location}
                 onChange={(e) => handleFilterChange('location', e.target.value)}
-                className="w-full bg-sky-100 pl-10 pr-8 py-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none"
+                className="w-full bg-amber-50 pl-10 pr-8 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-300 focus:border-transparent outline-none appearance-none"
               >
                 {locations.map(location => (
                   <option key={location} value={location}>{location}</option>
@@ -222,7 +215,7 @@ export default function Listings() {
               <select
                 value={filters.roomType}
                 onChange={(e) => handleFilterChange('roomType', e.target.value)}
-                className="w-full bg-sky-100 pl-10 pr-8 py-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none"
+                className="w-full bg-amber-50 pl-10 pr-8 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-300 focus:border-transparent outline-none appearance-none"
               >
                 {roomTypes.map(type => (
                   <option key={type} value={type}>{type}</option>
@@ -244,7 +237,7 @@ export default function Listings() {
                   placeholder="Min"
                   value={filters.minPrice}
                   onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                  className="w-full placeholder-gray-500 bg-sky-100 pl-8 pr-3 py-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full placeholder-gray-500 bg-amber-50 pl-8 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-300 focus:border-transparent outline-none"
                 />
               </div>
               <div className="relative w-28">
@@ -254,7 +247,7 @@ export default function Listings() {
                   placeholder="Max"
                   value={filters.maxPrice}
                   onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                  className="w-full placeholder-gray-500 bg-sky-100 pl-8 pr-3 py-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full placeholder-gray-500 bg-amber-50 pl-8 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-300 focus:border-transparent outline-none"
                 />
               </div>
             </div>
@@ -264,7 +257,7 @@ export default function Listings() {
               <button
                 onClick={applyFilters}
                 disabled={loading}
-                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap text-white bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 disabled:opacity-60"
               >
                 {loading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
                 {loading ? 'Searching...' : 'Search'}
@@ -272,7 +265,7 @@ export default function Listings() {
               <button
                 onClick={clearFilters}
                 disabled={loading}
-                className="flex items-center gap-2 bg-blue-400 hover:bg-blue-600 disabled:bg-gray-400 border border-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 disabled:opacity-60 bg-amber-50 text-amber-700 border border-amber-200 px-6 py-3 rounded-lg font-medium transition-colors whitespace-nowrap"
               >
                 Clear All
               </button>
@@ -300,7 +293,7 @@ export default function Listings() {
             appliedFilters.minPrice || appliedFilters.maxPrice || appliedFilters.search) && (
             <div className="flex flex-wrap gap-2">
               {appliedFilters.search && (
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                <span className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium">
                   Search: {appliedFilters.search}
                 </span>
               )}

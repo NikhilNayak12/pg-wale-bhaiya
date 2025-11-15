@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signOut } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { mockLogout } from '@/services/mockAuth';
 import { 
   HomeIcon, 
   BuildingOfficeIcon, 
@@ -21,9 +20,8 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
   ];
 
   const handleLogout = () => {
-  signOut(auth);
-  localStorage.removeItem('adminAuthenticated');
-  navigate('/admin-final-boss-1q2w/login');
+    mockLogout('admin');
+    navigate('/admin-final-boss-1q2w/login');
   };
 
   return (

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X, Upload, CheckCircle, AlertCircle } from 'lucide-react';
-import { db } from '../config/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { mockAdd } from '@/services/mockDB';
 
 const CashbackForm = ({ isOpen, onClose, pgId, pgName }) => {
   const [formData, setFormData] = useState({
@@ -118,7 +117,7 @@ const CashbackForm = ({ isOpen, onClose, pgId, pgName }) => {
     setIsSubmitting(true);
     setSubmitStatus(null);
     try {
-      await addDoc(collection(db, 'cashback_requests'), {
+      await mockAdd('cashbackRequests', {
         pgId,
         fullName: formData.fullName,
         contactInfo: formData.contactInfo,
@@ -128,7 +127,7 @@ const CashbackForm = ({ isOpen, onClose, pgId, pgName }) => {
         bookingCode: formData.bookingCode,
         paymentProofBase64: formData.paymentProofBase64,
         status: 'pending',
-        submittedAt: serverTimestamp()
+        submittedAt: new Date().toISOString()
       });
       setSubmitStatus('success');
       setTimeout(() => {

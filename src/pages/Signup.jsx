@@ -12,9 +12,7 @@ import {
   CheckCircle,
   Building
 } from "lucide-react";
-import { auth, db } from "@/config/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { mockSignup } from "@/services/mockAuth";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -46,7 +44,7 @@ export default function Signup() {
     setErrors(prev => ({ ...prev, [name]: undefined }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
     // Validate required fields
@@ -62,67 +60,28 @@ export default function Signup() {
 
     setIsSubmitting(true);
     setSuccess("");
-    // Create landlord user in Firebase Auth using client SDK
-    createUserWithEmailAndPassword(auth, formData.email, formData.password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        // Wait for auth state to update before writing to Firestore
-        const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
-          if (authUser && authUser.uid === user.uid) {
-            // Create landlord info object
-            const landlordInfo = {
-              id: user.uid,
-              name: formData.fullName,
-              email: formData.email,
-              phone: formData.phoneNumber,
-              businessName: formData.businessName,
-              status: 'active',
-              loginCreated: true,
-              createdAt: new Date().toISOString()
-            };
-            // Store in Firestore
-            try {
-              await setDoc(doc(db, "landlords", user.uid), landlordInfo);
-            } catch (firestoreError) {
-              setErrors(prev => ({ ...prev, general: "Error saving to database: " + firestoreError.message }));
-              setIsSubmitting(false);
-              unsubscribe();
-              return;
-            }
-            // Store login data locally
-            localStorage.setItem('landlordData', JSON.stringify(landlordInfo));
-            localStorage.setItem('landlordLoggedIn', 'true');
-            localStorage.setItem('landlordEmail', formData.email);
-            setIsSubmitting(false);
-            setSuccess("Account created successfully! Welcome emails have been sent. Redirecting to your dashboard...");
-            setTimeout(() => {
-              navigate(returnUrl);
-            }, 2000);
-            unsubscribe();
-          }
-        });
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        let msg = "";
-        switch (error.code) {
-          case "auth/email-already-in-use":
-            msg = "This email is already registered.";
-            setErrors(prev => ({ ...prev, email: msg }));
-            break;
-          case "auth/invalid-email":
-            msg = "Invalid email address.";
-            setErrors(prev => ({ ...prev, email: msg }));
-            break;
-          case "auth/weak-password":
-            msg = "Password should be at least 6 characters.";
-            setErrors(prev => ({ ...prev, password: msg }));
-            break;
-          default:
-            msg = error.message;
-            setErrors(prev => ({ ...prev, general: msg }));
-        }
-      });
+    
+    try {
+      // Mock signup (no Firebase)
+      await mockSignup(formData.email, formData.password, formData.fullName);
+      
+      setIsSubmitting(false);
+      setSuccess("Account created successfully! Redirecting to your dashboard...");
+      setTimeout(() => {
+        navigate(returnUrl);
+      }, 1500);
+    } catch (error) {
+      setIsSubmitting(false);
+      let msg = "";
+      
+      if (error.message === 'EMAIL_EXISTS') {
+        msg = "This email is already registered.";
+        setErrors(prev => ({ ...prev, email: msg }));
+      } else {
+        msg = error.message || "Signup failed. Please try again.";
+        setErrors(prev => ({ ...prev, general: msg }));
+      }
+    }
   };
 
   return (

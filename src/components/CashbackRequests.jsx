@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, X, Clock, DollarSign, FileText, Phone, Mail, Calendar, Hash } from 'lucide-react';
-import { getFirestore, doc, updateDoc, getDoc } from 'firebase/firestore';
-import { getStorage, ref as storageRef, uploadString, getDownloadURL } from 'firebase/storage';
-import { db } from '../config/firebase';
-import { collection, getDocs } from 'firebase/firestore';
-
-const storage = getStorage();
+import { mockGetAll, mockUpdate } from '../services/mockDB';
 
 const CashbackRequests = () => {
   const [requests, setRequests] = useState([]);
@@ -18,15 +13,11 @@ const CashbackRequests = () => {
     fetchCashbackRequests();
   }, [filter]);
 
-  // Replace fetchCashbackRequests to use Firestore
+  // Replace fetchCashbackRequests to use mock localStorage
   const fetchCashbackRequests = async () => {
     setLoading(true);
     try {
-      const querySnapshot = await getDocs(collection(db, 'cashback_requests'));
-      let data = [];
-      querySnapshot.forEach(docSnap => {
-        data.push({ id: docSnap.id, ...docSnap.data() });
-      });
+      let data = mockGetAll('cashbackRequests');
       if (filter !== 'all') {
         data = data.filter(r => r.status === filter);
       }
@@ -38,25 +29,17 @@ const CashbackRequests = () => {
     }
   };
 
-  // Admin approval: upload base64 to Storage, update Firestore
+  // Admin approval: update mock localStorage (no real storage upload)
   const updateRequestStatus = async (requestId, status, adminNotes = '') => {
     setIsUpdating(true);
     try {
-      const requestDocRef = doc(db, 'cashback_requests', requestId);
-      const requestDoc = await getDoc(requestDocRef);
-      let updateData = { status, adminNotes, updatedAt: new Date().toISOString() };
-      if (status === 'approved' && requestDoc.exists()) {
-        const data = requestDoc.data();
-        if (data.paymentProofBase64 && !data.paymentProofUrl) {
-          // Upload to Storage
-          const fileName = `cashback/${requestId}_${Date.now()}`;
-          const fileRef = storageRef(storage, fileName);
-          const uploadResult = await uploadString(fileRef, data.paymentProofBase64, 'data_url');
-          const url = await getDownloadURL(fileRef);
-          updateData.paymentProofUrl = url;
-        }
-      }
-      await updateDoc(requestDocRef, updateData);
+      const updateData = { 
+        status, 
+        adminNotes, 
+        updatedAt: new Date().toISOString() 
+      };
+      
+      await mockUpdate('cashbackRequests', requestId, updateData);
       setRequests(prev => prev.map(req => req.id === requestId ? { ...req, ...updateData } : req));
       setSelectedRequest(null);
     } catch (error) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getPGById, incrementPGViews } from "@/utils/api";
+import { demoAllPGs } from "../data/pgs";
+import { mockGetAll } from "../services/mockDB";
 import { 
   MapPin, 
   Users, 
@@ -14,7 +15,9 @@ import {
   ArrowLeft,
   Phone,
   Mail,
-  MessageCircle
+  MessageCircle,
+  Navigation,
+  Clock
 } from "lucide-react";
 import ImageLightbox from "@/components/ImageLightbox";
 
@@ -26,16 +29,21 @@ export default function PGDetails() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Fetch PG data from API and increment views
+  // Fetch PG data from static demo data + localStorage
   useEffect(() => {
     const fetchPGDetails = async () => {
       try {
         setLoading(true);
-        const response = await getPGById(id);
-        if (response.data.success && response.data.data) {
-          setPg(response.data.data);
-          // Increment PG views after successful fetch
-          incrementPGViews(id);
+        
+        // Combine static demo PGs + landlord PGs from localStorage
+        const landlordPGs = mockGetAll('landlordPGs') || [];
+        const allPGs = [...demoAllPGs, ...landlordPGs];
+        
+        // Find PG by ID
+        const foundPG = allPGs.find(p => p.id === id);
+        
+        if (foundPG) {
+          setPg(foundPG);
         } else {
           setError('PG not found');
         }
@@ -54,20 +62,20 @@ export default function PGDetails() {
 
   // Contact handlers
   const handleCallNow = () => {
-    const phoneNumber = pgData.contact?.phone || pg?.phone || '+919109222131';
+    const phoneNumber = pg?.contact?.phone || pg?.phone || '+919109222131';
     window.open(`tel:${phoneNumber}`, '_self');
   };
 
   const handleWhatsApp = () => {
-    const whatsappNumber = pgData.contact?.whatsapp || pg?.whatsapp || pgData.contact?.phone || pg?.phone || '919109222131';
-    const message = encodeURIComponent(`Hi! I'm interested in ${pgData.name || 'your PG'}. Can you please share more details about availability and pricing?`);
+    const whatsappNumber = pg?.contact?.whatsapp || pg?.whatsapp || pg?.contact?.phone || pg?.phone || '919109222131';
+    const message = encodeURIComponent(`Hi! I'm interested in ${pg?.name || 'your PG'}. Can you please share more details about availability and pricing?`);
     window.open(`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${message}`, '_blank');
   };
 
   const handleEmail = () => {
-    const email = pgData.contact?.email || 'contact@pgwalebhaiya.com';
-    const subject = encodeURIComponent(`Inquiry about ${pgData.name || 'PG'}`);
-    const body = encodeURIComponent(`Hi,\n\nI'm interested in ${pgData.name || 'your PG'} and would like to know more about:\n- Availability\n- Pricing\n- Amenities\n- Visit schedule\n\nThank you!`);
+    const email = pg?.contact?.email || 'contact@pgwalebhaiya.com';
+    const subject = encodeURIComponent(`Inquiry about ${pg?.name || 'PG'}`);
+    const body = encodeURIComponent(`Hi,\n\nI'm interested in ${pg?.name || 'your PG'} and would like to know more about:\n- Availability\n- Pricing\n- Amenities\n- Visit schedule\n\nThank you!`);
     window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_self');
   };
 
@@ -325,6 +333,41 @@ export default function PGDetails() {
                 )}
               </div>
             </div>
+
+            {/* Nearby Places Section */}
+            {pg.nearbyPlaces && pg.nearbyPlaces.length > 0 && (
+              <div className="mb-4">
+                <h2 className="text-xl font-bold text-gray-900 mb-3 animate-fade-in">Nearby Places</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {pg.nearbyPlaces.map((place, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 transform transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-amber-300 hover:from-amber-100 hover:to-orange-100 group"
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-amber-600 to-amber-700 rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <Navigation size={18} className="text-white group-hover:animate-pulse" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-sm mb-1 group-hover:text-amber-800 transition-colors duration-300">
+                          {place.name}
+                        </h3>
+                        <div className="flex items-center gap-3 text-xs text-gray-600">
+                          <div className="flex items-center gap-1">
+                            <MapPin size={12} className="text-amber-600" />
+                            <span className="font-medium">{place.distance}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock size={12} className="text-amber-600" />
+                            <span>{place.time}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Contact Section */}
             <div className="border-t pt-4">

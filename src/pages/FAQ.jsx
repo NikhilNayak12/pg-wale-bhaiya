@@ -80,16 +80,16 @@ export default function FAQ() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/30 to-orange-50/50">
       {/* Floating Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-blue-400/10 rounded-full blur-xl"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-purple-400/10 rounded-full blur-lg"></div>
-        <div className="absolute bottom-40 left-1/4 w-20 h-20 bg-indigo-400/10 rounded-full blur-lg"></div>
+        <div className="absolute top-20 left-10 w-32 h-32 bg-amber-400/10 rounded-full blur-xl"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-orange-400/10 rounded-full blur-lg"></div>
+        <div className="absolute bottom-40 left-1/4 w-20 h-20 bg-amber-400/10 rounded-full blur-lg"></div>
       </div>
 
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-sky-200 to-blue-300 text-white pt-28 pb-12 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-amber-200 to-orange-300 text-white pt-28 pb-12 overflow-hidden">
         {/* Decorative Elements */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
@@ -100,8 +100,8 @@ export default function FAQ() {
         <div className="relative max-w-5xl mx-auto px-6 text-center">
           <div className="flex justify-center mb-8">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-800/30 to-pink-300/30 rounded-full blur-xl animate-pulse"></div>
-              <div className="relative p-4 bg-gradient-to-r from-blue-600/20 to-pink-500/20 backdrop-blur-sm rounded-full border border-purple-500/20 shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-800/30 to-orange-300/30 rounded-full blur-xl animate-pulse"></div>
+              <div className="relative p-4 bg-gradient-to-r from-amber-600/20 to-orange-500/20 backdrop-blur-sm rounded-full border border-amber-500/20 shadow-2xl">
                 <Sparkles size={42} className="text-white animate-bounce" style={{animationDuration: '3s'}} />
               </div>
             </div>
@@ -125,8 +125,8 @@ export default function FAQ() {
           <div key={categoryIndex} className="mb-16">
             {/* Category Header */}
             <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-full border border-blue-200/50 backdrop-blur-sm">
-                <category.icon size={28} className="text-blue-600" />
+              <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-full border border-amber-200/50 backdrop-blur-sm">
+                <category.icon size={28} className="text-amber-700" />
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
                   {category.category}
                 </h2>
@@ -142,26 +142,26 @@ export default function FAQ() {
                 return (
                   <div
                     key={questionIndex}
-                    className={`group relative bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/80 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 ${
-                      isOpen ? 'shadow-xl shadow-blue-500/20 ring-2 ring-blue-500/20' : 'shadow-md'
+                    className={`group relative bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/80 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/10 hover:-translate-y-1 ${
+                      isOpen ? 'shadow-xl shadow-amber-500/20 ring-2 ring-amber-500/20' : 'shadow-md'
                     }`}
                   >
                     <button
                       onClick={() => toggleAccordion(globalIndex)}
-                      className="w-full px-8 py-6 text-left flex items-center justify-between hover:bg-blue-50/50 transition-all duration-200 group"
+                      className="w-full px-8 py-6 text-left flex items-center justify-between hover:bg-amber-50/50 transition-all duration-200 group"
                     >
                       <div className="flex items-start gap-4">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-                          isOpen ? 'bg-blue-500 text-white' : 'bg-blue-100 text-blue-600 group-hover:bg-blue-200'
+                          isOpen ? 'bg-amber-600 text-white' : 'bg-amber-100 text-amber-700 group-hover:bg-amber-200'
                         }`}>
                           {questionIndex + 1}
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 pr-4 leading-relaxed group-hover:text-blue-700 transition-colors duration-200">
+                        <h3 className="text-xl font-semibold text-gray-900 pr-4 leading-relaxed group-hover:text-amber-700 transition-colors duration-200">
                           {faq.question}
                         </h3>
                       </div>
                       <div className={`flex-shrink-0 transition-all duration-300 ${
-                        isOpen ? 'rotate-180 text-blue-600' : 'text-gray-400 group-hover:text-blue-500'
+                        isOpen ? 'rotate-180 text-amber-700' : 'text-gray-400 group-hover:text-amber-600'
                       }`}>
                         <ChevronDown size={24} className="drop-shadow-sm" />
                       </div>
@@ -172,7 +172,7 @@ export default function FAQ() {
                     } overflow-hidden`}>
                       <div className="px-8 pb-8">
                         <div className="pl-12">
-                          <div className="h-px bg-gradient-to-r from-blue-200 to-transparent mb-6"></div>
+                          <div className="h-px bg-gradient-to-r from-amber-200 to-transparent mb-6"></div>
                           <p className="text-lg text-gray-700 leading-relaxed font-medium">
                             {faq.answer}
                           </p>
@@ -188,11 +188,11 @@ export default function FAQ() {
       </div>
 
       {/* Contact CTA Section */}
-      <div className="relative bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white py-12 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white py-12 overflow-hidden">
         {/* Decorative Background */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-purple-400/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-orange-400/10 rounded-full blur-2xl"></div>
         </div>
         
         <div className="relative max-w-4xl mx-auto px-6 text-center">
@@ -200,10 +200,10 @@ export default function FAQ() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-white/15 backdrop-blur-sm rounded-full mb-6">
               <MessageCircle size={32} className="text-white" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-amber-100 bg-clip-text text-transparent">
               Still Have Questions?
             </h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-amber-100 mb-8 max-w-2xl mx-auto leading-relaxed">
               Can't find what you're looking for? We're here to help! Reach out and we'll get back to you faster than you can say "PG hunting" 🏠
             </p>
           </div>
