@@ -1,0 +1,12 @@
+# Backend files - not needed for frontend deployment
+backend/
+*.md
+firebase.json
+firestore.indexes.json
+test-*.js
+*-test.js
+setup-*.js
+make-*.js
+mark-*.js
+pre-deployment-check.sh
+

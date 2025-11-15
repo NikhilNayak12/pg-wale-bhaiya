@@ -34,5 +34,9 @@ export default defineConfig({
         }
       }
     }
+  },
+  // Exclude backend dependencies from optimization
+  optimizeDeps: {
+    exclude: ['firebase-admin', 'nodemailer', 'bcrypt', 'jsonwebtoken', 'multer', 'cors', 'express']
   }
 })
