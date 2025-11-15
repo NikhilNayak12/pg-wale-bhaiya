@@ -1,5 +1,9 @@
 # Backend files - not needed for frontend deployment
 backend/
+backend/**
+**/backend/**
+backend/functions/
+backend/functions/**
 *.md
 firebase.json
 firestore.indexes.json
@@ -9,4 +13,5 @@ setup-*.js
 make-*.js
 mark-*.js
 pre-deployment-check.sh
-
+**/node_modules/backend/**
+backend/node_modules/**
